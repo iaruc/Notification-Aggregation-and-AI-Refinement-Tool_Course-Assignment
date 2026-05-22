@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>学讯聚合 · AI 摘要与微信推送 Demo</title>
+    <link rel="stylesheet" href="css/main.css" />
+  </head>
+  <body>
+    <div class="app-bg" aria-hidden="true"></div>
+    <header class="site-header">
+      <div class="brand">
+        <span class="brand-icon" aria-hidden="true">◆</span>
+        <div>
+          <h1>学讯聚合 <span class="tag">Demo</span></h1>
+          <p class="subtitle">多源通知 → AI 精炼 → 定时微信推送（模拟）</p>
+        </div>
+      </div>
+      <nav class="main-nav" aria-label="主导航">
+        <button type="button" class="nav-btn is-active" data-view="settings">设置</button>
+        <button type="button" class="nav-btn" data-view="sources">数据源</button>
+        <button type="button" class="nav-btn" data-view="wechat">微信 &amp; AI</button>
+      </nav>
+    </header>
+
+    <main class="main">
+      <!-- 仅设置 -->
+      <section id="view-settings" class="view is-visible">
+        <div class="settings-wrap">
+          <div class="card settings-card">
+            <h2>推送与过滤设置</h2>
+            <p class="card-hint">调整选项将影响聊天内的摘要短信与 AI 对话上下文。双击项目里的「启动演示.bat」即可使用（无需其它命令）。</p>
+            <fieldset class="field-group">
+              <legend>希望接收推送的时间段（演示：仅影响「推送预览」文案，不过滤通知）</legend>
+              <label class="chk"><input type="checkbox" name="slot" value="morning" checked /> 早间 7:00–9:00</label>
+              <label class="chk"><input type="checkbox" name="slot" value="noon" checked /> 午间 11:30–13:00</label>
+              <label class="chk"><input type="checkbox" name="slot" value="evening" checked /> 晚间 20:00–22:00</label>
+            </fieldset>
+            <fieldset class="field-group">
+              <legend>信息来源</legend>
+              <label class="chk"><input type="checkbox" name="source" value="wechat" checked /> 微信群</label>
+              <label class="chk"><input type="checkbox" name="source" value="qq" checked /> QQ 群</label>
+              <label class="chk"><input type="checkbox" name="source" value="chaoxing" checked /> 学习通</label>
+              <label class="chk"><input type="checkbox" name="source" value="email" checked /> 邮件</label>
+              <label class="chk"><input type="checkbox" name="source" value="sms" checked /> 短信</label>
+            </fieldset>
+            <fieldset class="field-group">
+              <legend>只包含发送时间在</legend>
+              <label class="inline">
+                <span>从</span>
+                <input type="datetime-local" id="filter-from" />
+              </label>
+              <label class="inline">
+                <span>到</span>
+                <input type="datetime-local" id="filter-to" />
+              </label>
+              <button type="button" class="btn-text" id="btn-reset-time">恢复默认（2026/5/1–今天）</button>
+            </fieldset>
+          </div>
+        </div>
+      </section>
+
+      <!-- 各软件模拟界面 -->
+      <section id="view-sources" class="view">
+        <div class="sources-toolbar">
+          <p class="section-lead">
+            以下为模拟界面与虚构数据。每条通知右上角可<strong>编辑/删除</strong>，每个面板顶部可<strong>新增</strong>；改动会自动保存在浏览器本地。在微信会话内的摘要短信里点击「查看原文」会联动定位到下方对应面板。
+          </p>
+          <button type="button" class="btn-text" id="btn-reset-sources">恢复默认数据（清空本地修改）</button>
+        </div>
+        <div class="sources-grid">
+          <article class="mock-shell mock-wechat-group" id="panel-wechat">
+            <header class="mock-bar wechat-bar">
+              <span class="mock-title">微信群 · 算法研讨</span>
+              <div class="mock-bar-right">
+                <span class="mock-meta">127 人</span>
+                <button type="button" class="mock-add-btn" data-add-source="wechat" aria-label="新增微信群通知">+ 新增</button>
+              </div>
+            </header>
+            <div class="mock-body chat-scroll" id="mock-wechat-list"></div>
+          </article>
+
+          <article class="mock-shell mock-qq" id="panel-qq">
+            <header class="mock-bar qq-bar">
+              <span class="mock-title">QQ 群 · 大三课程通知</span>
+              <div class="mock-bar-right">
+                <span class="mock-meta">静音</span>
+                <button type="button" class="mock-add-btn" data-add-source="qq" aria-label="新增 QQ 群通知">+ 新增</button>
+              </div>
+            </header>
+            <div class="mock-body chat-scroll" id="mock-qq-list"></div>
+          </article>
+
+          <article class="mock-shell mock-chaoxing" id="panel-chaoxing">
+            <header class="mock-bar chaoxing-bar">
+              <span class="mock-title">学习通</span>
+              <div class="mock-bar-right">
+                <span class="mock-meta">消息</span>
+                <button type="button" class="mock-add-btn" data-add-source="chaoxing" aria-label="新增学习通通知">+ 新增</button>
+              </div>
+            </header>
+            <div class="mock-body list-scroll" id="mock-chaoxing-list"></div>
+          </article>
+
+          <article class="mock-shell mock-email" id="panel-email">
+            <header class="mock-bar email-bar">
+              <span class="mock-title">教务邮箱</span>
+              <div class="mock-bar-right">
+                <span class="mock-meta">收件箱</span>
+                <button type="button" class="mock-add-btn" data-add-source="email" aria-label="新增邮件">+ 新增</button>
+              </div>
+            </header>
+            <div class="mock-body list-scroll" id="mock-email-list"></div>
+          </article>
+
+          <article class="mock-shell mock-sms" id="panel-sms">
+            <header class="mock-bar sms-bar">
+              <span class="mock-title">短信</span>
+              <div class="mock-bar-right">
+                <span class="mock-meta">今天</span>
+                <button type="button" class="mock-add-btn" data-add-source="sms" aria-label="新增短信">+ 新增</button>
+              </div>
+            </header>
+            <div class="mock-body sms-scroll" id="mock-sms-list"></div>
+          </article>
+        </div>
+      </section>
+
+      <!-- 微信 + AI -->
+      <section id="view-wechat" class="view">
+        <div class="wechat-layout">
+          <div class="card wechat-sidebar">
+            <h2>推送预览</h2>
+            <p class="card-hint">模拟系统在设定时间把汇总发到会话内；「今日摘要」以短信形式显示在手机聊天区域。</p>
+            <p class="card-hint llm-backend-hint">
+              AI 对话需要 Qwen 模型：若项目内已有 <code>models/Qwen2-1.5B-Instruct</code> 则离线可用；否则首次对话时会自动从网络下载（约 3GB，需联网）。仅需双击「启动演示.bat」，脚本会自动安装 Python 依赖。
+            </p>
+            <ul class="preview-push-list" id="preview-push"></ul>
+            <div class="sidebar-actions">
+              <button type="button" class="btn" id="btn-ai-summarize">AI 智能摘要（Qwen 重写）</button>
+              <button type="button" class="btn primary" id="btn-simulate-push">模拟推送「学讯日报」到聊天</button>
+            </div>
+            <p class="ai-summary-status" id="ai-summary-status" role="status" aria-live="polite"></p>
+          </div>
+          <div class="wechat-phone">
+            <div class="phone-notch" aria-hidden="true"></div>
+            <header class="wx-header">
+              <span class="wx-back">‹</span>
+              <div class="wx-title-wrap">
+                <span class="wx-title">学讯助手</span>
+                <span class="wx-sub">Qwen 对话 · 摘要短信在会话内</span>
+              </div>
+              <span class="wx-more">···</span>
+            </header>
+            <div class="wx-chat" id="wx-chat" role="log" aria-live="polite" aria-relevant="additions"></div>
+            <div class="wx-input-row">
+              <button type="button" class="wx-voice" aria-label="语音">🎤</button>
+              <input type="text" class="wx-input" id="wx-input" placeholder="和 AI 对话，例如：今天的作业有哪些？" autocomplete="off" />
+              <button type="button" class="wx-send" id="wx-send">发送</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <p>
+        使用方式：仅双击 <strong>启动演示.bat</strong>（首次会自动安装依赖）；浏览器访问 <strong>http://127.0.0.1:5055/</strong>，网页与接口同端口。
+        本页面为课程演示，不连接真实微信。
+      </p>
+    </footer>
+
+    <script src="js/mockData.js?v=2"></script>
+    <script src="js/app.js?v=2"></script>
+  </body>
+</html>
